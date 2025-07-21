@@ -13,6 +13,7 @@ import {
   FaEnvelope,
   FaPhoneAlt,
 } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 
 export default function SellForm() {
   const [title, setTitle] = useState("");
@@ -25,6 +26,7 @@ export default function SellForm() {
   const [email, setEmail] = useState("");
   const [dial, setDial] = useState("");
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,6 +46,14 @@ export default function SellForm() {
       return;
     }
 
+    const token = localStorage.getItem("token");
+    if (!token || token === "undefined" || token.length < 10) {
+      toast.error("Session expired or not logged in. Please log in again.");
+      logout();
+      navigate("/login");
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("title", title);
@@ -57,8 +67,6 @@ export default function SellForm() {
       formData.append("dial", dial);
 
       // Send POST request with token (assuming token saved in localStorage or context)
-      const token = localStorage.getItem("token");
-
       await axios.post("/api/products", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -69,9 +77,15 @@ export default function SellForm() {
       toast.success("Product listed successfully!");
       navigate("/my-products");
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to post product, try again"
-      );
+      if (error.response && error.response.status === 401) {
+        toast.error("Session expired or unauthorized. Please log in again.");
+        logout();
+        navigate("/login");
+      } else {
+        toast.error(
+          error.response?.data?.message || "Failed to post product, try again"
+        );
+      }
     }
   };
 
