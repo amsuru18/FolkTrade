@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+html {
+  min-height: 100%;
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  @apply bg-gradient-to-br from-blue-50 to-white dark:from-black dark:to-purple-900 text-gray-900 dark:text-white transition-colors duration-300 min-h-screen;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
